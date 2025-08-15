@@ -5,6 +5,7 @@
 import React, { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { useTexture } from '@react-three/drei'; // 画像テクスチャを読み込むために必要
 
 // 1から5の数値を特定の色に変換するマッピングを定義
 const answerToColorMap = {
@@ -20,63 +21,90 @@ const mapAnswersToColors = (answers) => {
   if (!answers || answers.length === 0) return [];
   return answers.map(answer => answerToColorMap[answer] || '#ffffff'); // マップにない場合は白
 };
+// 個々のランタンコンポーネント
+function Lantern({ color, initialPosition, isStatic }) {
+    const lanternRef = useRef();
+    const lightRef = useRef();
+    // 和紙のようなテクスチャ画像を読み込みます
+    const texture = useTexture('/lantern_texture.png'); 
 
-export function FloatingLanterns({ colors: rawAnswers }) {
-  const groupRef = useRef();
+    const targetY = useMemo(() => isStatic ? initialPosition[1] : 1 + Math.random() * 3, [isStatic, initialPosition]);
+    const hasReachedTarget = useRef(isStatic);
 
-  const gradientColors = useMemo(() => {
-    const mappedColors = mapAnswersToColors(rawAnswers);
+    useFrame(({ clock }) => {
+        if (!lanternRef.current) return;
+        const time = clock.getElapsedTime();
 
-    if (!mappedColors || mappedColors.length < 1) {
-      return [];
-    }
-    if (mappedColors.length === 1) {
-      return [new THREE.Color(mappedColors[0]).getHex()];
-    }
+        // 横揺れの動き
+        const swayX = initialPosition[0] + Math.sin(time * 0.3 + initialPosition[0]) * 1.5;
+        lanternRef.current.position.x = swayX;
+        const driftZ = initialPosition[2] + Math.cos(time * 0.2 + initialPosition[2]) * 1.5;
+        lanternRef.current.position.z = driftZ;
+        
+        // 縦の動き
+        if (!hasReachedTarget.current) {
+            lanternRef.current.position.y += 0.03;
+            if (lanternRef.current.position.y >= targetY) {
+                hasReachedTarget.current = true;
+                lanternRef.current.position.y = targetY;
+            }
+        } else {
+            const bobY = targetY + Math.sin(time * 0.7 + initialPosition[0]) * 0.08;
+            lanternRef.current.position.y = bobY;
+        }
 
-    const gradient = [];
-    const stepsPerSegment = 5;
-    for (let i = 0; i < mappedColors.length - 1; i++) {
-      const startColor = new THREE.Color(mappedColors[i]);
-      const endColor = new THREE.Color(mappedColors[i + 1]);
-      for (let j = 0; j < stepsPerSegment; j++) {
-        const t = j / stepsPerSegment;
-        gradient.push(startColor.clone().lerp(endColor, t).getHex());
-      }
-    }
-    gradient.push(new THREE.Color(mappedColors[mappedColors.length - 1]).getHex());
-    return gradient;
-  }, [rawAnswers]);
+        // 光のゆらぎ
+        if (lightRef.current) {
+            lightRef.current.intensity = 1.0 + Math.sin(clock.getElapsedTime() * 5 + initialPosition[0]) * 0.2;
+        }
+    });
 
-  useFrame(({ clock }) => {
-    if (groupRef.current && groupRef.current.children.length > 0) { 
-      groupRef.current.children.forEach((lantern, index) => {
-        const time = clock.getElapsedTime() + index * 0.1;
-        lantern.position.y = (Math.sin(time * 0.5) * 0.5) + (index * 0.05);
-        lantern.position.x = Math.sin(time * 0.7 + index * 0.1) * 2;
-        lantern.rotation.z = Math.cos(time * 0.8 + index * 0.1) * 0.5;
-      });
-    }
-  });
-
-  if (gradientColors.length === 0) {
-    return null;
-  }
-
-  return (
-    <group ref={groupRef}>
-      {gradientColors.map((color, i) => (
-        <mesh key={i} position={[(Math.random() - 0.5) * 10, i * 0.5, (Math.random() - 0.5) * 10]}>
-          <sphereGeometry args={[0.2, 16, 16]} />
-          <meshStandardMaterial
-            color={color}
-            emissive={color}
-            emissiveIntensity={0.8}
-            transparent
-            opacity={0.9}
-          />
-        </mesh>
-      ))}
-    </group>
-  );
+    return (
+        <group ref={lanternRef} position={initialPosition} scale={0.8}> {/* 少し小ぶりに */}
+            {/* ★ 1. ランタンの光る本体部分（少し縦長の箱に） */}
+            <mesh>
+                <boxGeometry args={[0.6, 0.8, 0.6]} />
+                <meshStandardMaterial
+                    map={texture}
+                    color={color}
+                    emissive={color}
+                    emissiveIntensity={1.8}
+                    transparent={true}
+                    opacity={0.95}
+                    toneMapped={false}
+                />
+            </mesh>
+            {/* ★ 2. ランタンの上部のフチ（木枠） */}
+            <mesh position={[0, 0.42, 0]}>
+                <boxGeometry args={[0.65, 0.05, 0.65]} />
+                <meshStandardMaterial color="#5c3d2e" />
+            </mesh>
+             {/* ★ 3. ランタンの下部のフチ（木枠） */}
+            <mesh position={[0, -0.42, 0]}>
+                <boxGeometry args={[0.65, 0.05, 0.65]} />
+                <meshStandardMaterial color="#5c3d2e" />
+            </mesh>
+            <pointLight ref={lightRef} color={"#ffc975"} intensity={1.0} distance={3.0} decay={2} />
+        </group>
+    );
 }
+// 複数のランタンを管理するコンポーネント
+export function FloatingLanterns({ lanterns }) {
+    return (
+        <group>
+            {lanterns.map((lanternData) => (
+                <Lantern
+                    key={lanternData.id}
+                    color={lanternData.color}
+                    isStatic={lanternData.isStatic}
+                    initialPosition={[
+                        lanternData.isStatic ? (Math.random() - 0.5) * 20 : 0,
+                        lanternData.isStatic ? 1 + Math.random() * 3 : -10,
+                        lanternData.isStatic ? (Math.random() - 0.5) * 20 : 0,
+                    ]}
+                />
+            ))}
+        </group>
+    );
+}
+

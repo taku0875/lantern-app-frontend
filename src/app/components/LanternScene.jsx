@@ -11,12 +11,12 @@ const SkyboxContent = () => {
   console.log("--- CORRECT LanternScene.jsx code is running ---"); 
 
   const texture = useLoader(THREE.CubeTextureLoader, [ 
-    '/textures/nightsky/nx.jpg', 
-    '/textures/nightsky/ny.jpg', 
-    '/textures/nightsky/nz.jpg',
-    '/textures/nightsky/px.jpg', 
-    '/textures/nightsky/py.jpg', 
-    '/textures/nightsky/pz.jpg'
+    '/textures/nightsky/px.jpg', // 1. 右
+    '/textures/nightsky/nx.jpg', // 2. 左
+    '/textures/nightsky/py.jpg', // 3. 上
+    '/textures/nightsky/ny.jpg', // 4. 下
+    '/textures/nightsky/pz.jpg', // 5. 奥
+    '/textures/nightsky/nz.jpg'  // 6. 手前
   ]);
 
   return <primitive attach="background" object={texture} />;

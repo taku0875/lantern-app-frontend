@@ -36,14 +36,17 @@ export async function saveMood(prevState, formData) {
 
 
 // 過去のランタンを取得する関数
-export async function getPastLanterns() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/mood/week?user_id=user_01`);
-        if (!response.ok) throw new Error("Failed to fetch lanterns");
-        const data = await response.json();
-        return data.colors;
-    } catch (error) {
-        console.error("Error fetching past lanterns:", error);
-        return [];
+export async function getPastLanterns(userId) {
+  if (!userId) return [];
+  try {
+    const response = await fetch(`${API_BASE_URL}/lanterns?user_id=${userId}`); // 仮のAPIエンドポイント
+    if (!response.ok) {
+      throw new Error("Failed to fetch past lanterns");
     }
+    const data = await response.json();
+    return data; // バックエンドから返されるランタンのリスト
+  } catch (error) {
+    console.error("Error fetching past lanterns:", error);
+    return [];
+  }
 }
