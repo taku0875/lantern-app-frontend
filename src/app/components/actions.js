@@ -16,7 +16,7 @@ export async function saveMood(prevState, formData) {
   });
 
   try {
-    const response = await fetch(`${BACKEND_URL}/mood/save`, {
+    const response = await fetch(`${API_BASE_URL}/mood/save`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ answers, user_id: 'user1' }),
@@ -36,7 +36,7 @@ export async function saveMood(prevState, formData) {
 export async function getWeeklyColors() {
    // ...（残りのコードは変更なし）
   try {
-    const response = await fetch(`${BACKEND_URL}/mood/week?user_id=user1`, {
+    const response = await fetch(`${API_BASE_URL}/mood/week?user_id=user1`, {
       cache: 'no-store'
     });
 
