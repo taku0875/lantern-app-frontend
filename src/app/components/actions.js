@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 
 // 新しい絶対パスに修正
 
-const API_BASE_URL = 'http://127.0.0.1:8000'; // FastAPIサーバーのアドレス
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_ENDPOINT; // FastAPIサーバーのアドレス
 
 export async function saveMood(prevState, formData) {
   // ★ 1. 現在ログインしているユーザーのセッション情報を取得
