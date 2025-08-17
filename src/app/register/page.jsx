@@ -71,7 +71,7 @@ export default function Register() {
 
         try {
             // FastAPIバックエンドへの登録リクエスト
-            const response = await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT + '/register', {
+            const response = await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT + '/api/auth/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
