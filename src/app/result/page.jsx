@@ -299,7 +299,7 @@ export default function Page() {
                 {/* 日曜日限定のランタン開放ボタン */}
                 {isSunday() && (
                     <div className="w-full px-2 mt-4">
-                        <Link href="./lentern">
+                        <Link href="./lanterns">
                             <button className="w-full border-3 border-orange-400 rounded-lg p-3 bg-gradient-to-r from-orange-400 to-yellow-400 text-white font-bold hover:from-orange-500 hover:to-yellow-500 transition-all duration-200 transform hover:scale-105 shadow-lg">
                                 🏮 ランタンを開放する
                             </button>

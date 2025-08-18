@@ -28,10 +28,9 @@ export default function Register() {
     const [formData, setFormData] = useState({
         user_id: '',
         password: '',
-        age: '',
+        birthday: '',
         gender: '',
         prefecture: '', // address から prefecture に変更
-        phone_number: '',
         email: ''
     });
     
@@ -77,12 +76,11 @@ export default function Register() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    user_id: formData.user_id.trim(),
+                    name: formData.user_id.trim(),
                     password: formData.password.trim(),
-                    age: parseInt(formData.age),
+                    birthday: formData.birthday,
                     gender: formData.gender,
                     prefecture: formData.prefecture, // 都道府県情報
-                    phone_number: formData.phone_number.trim(),
                     email: formData.email.trim()
                 }),
             });
@@ -96,13 +94,12 @@ export default function Register() {
                 // ユーザー情報をContextに保存
                 const userData = {
                     id: data.user.id,
-                    username: data.user.user_id || data.user.username,
+                    username: data.user.username || data.user.name,
                     email: data.user.email,
-                    name: data.user.name || data.user.user_id, // 表示名がない場合はuser_idを使用
-                    age: data.user.age,
+                    name: data.user.name,
+                    birthday: data.user.birthday,
                     gender: data.user.gender,
-                    prefecture: data.user.prefecture,
-                    phone_number: data.user.phone_number
+                    prefecture: data.user.prefecture
                 };
 
                 // 登録と同時にログイン状態にする
@@ -134,10 +131,9 @@ export default function Register() {
         //         username: formData.user_id,
         //         email: formData.email,
         //         name: formData.user_id,
-        //         age: parseInt(formData.age),
+        //         birthday: formData.birthday,
         //         gender: formData.gender,
-        //         prefecture: formData.prefecture,
-        //         phone_number: formData.phone_number
+        //         prefecture: formData.prefecture
         //     };
             
         //     // Context経由でログイン状態にする
@@ -207,17 +203,14 @@ export default function Register() {
                             />
                         </div>
                         <div className=" mb-4 w-2/5 h-15">
-                            <p>年齢</p>
+                            <p>生年月日</p>
                             <input 
-                                type="number" 
-                                name="age" 
-                                value={formData.age}
+                                type="date" 
+                                name="birthday" 
+                                value={formData.birthday}
                                 onChange={handleInputChange}
-                                placeholder="年齢" 
                                 className="border border-gray-400 w-full h-1/2 px-2 bg-transparent rounded-sm text-[12px] font-[Inter]"
                                 disabled={isLoading}
-                                min="0"
-                                max="150"
                                 required
                             />
                         </div>
@@ -255,20 +248,6 @@ export default function Register() {
                                     </option>
                                 ))}
                             </select>
-                        </div>
-                        <div className="mb-4 w-full h-15">
-                            <p>電話番号</p>
-                            <input 
-                                type="tel" 
-                                name="phone_number" 
-                                value={formData.phone_number}
-                                onChange={handleInputChange}
-                                placeholder="電話番号（ハイフンなし）" 
-                                className="border border-gray-400 w-full h-1/2 px-2 bg-transparent rounded-sm text-[12px] font-[Inter]"
-                                disabled={isLoading}
-                                pattern="[0-9]{10,11}"
-                                required
-                            />
                         </div>
                         <div className="mb-4 w-full h-15">
                             <p>メールアドレス</p>
