@@ -198,13 +198,24 @@ export default function Page() {
     };
 
     useEffect(() => {
+        let isMounted = true;
+        
         const loadQuestions = async () => {
+            if (!isMounted) return;
+            
             setIsLoading(true);
             await fetchQuestions();
-            setIsLoading(false);
+            
+            if (isMounted) {
+                setIsLoading(false);
+            }
         };
 
         loadQuestions();
+        
+        return () => {
+            isMounted = false;
+        };
     }, []);
 
     // ローディング中の表示
