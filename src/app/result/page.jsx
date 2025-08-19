@@ -16,7 +16,8 @@ export default function Page() {
     // 日曜日かどうかを判定する関数を追加（useEffect の前あたりに）
     const isSunday = () => {
         const today = new Date();
-        return today.getDay() === 0; // 0が日曜日
+        // return today.getDay() === 0; // 0が日曜日
+        return true; // デバッグ用に常にtrueを返す
     };
 
     // 固定の提案行動データ（スコア別）
