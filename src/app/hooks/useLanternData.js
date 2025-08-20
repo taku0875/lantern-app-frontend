@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { getPastLanternsAPI, saveNewLantanAPI } from '..src/lib/api';
+import { getPastLanternsAPI, saveNewLantanAPI } from '@/lib/api';
 
 const COLOR_MAP = {
   1: '#ed735b', 2: '#f18c30', 3: '#57b658',
