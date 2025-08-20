@@ -14,6 +14,15 @@ export default function Page() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [dayResult, setDayResult] = useState(null);
 
+    // color_idと色のマッピング
+    const COLOR_MAP = {
+        1: '#ed735b', // 赤
+        2: '#f18c30', // 黄
+        3: '#57b658', // 緑  
+        4: '#0a9994', // 青緑
+        5: '#1c5dab' // 青
+    };
+
     // 今週の日付範囲を計算する関数
     const getCurrentWeekRange = () => {
         const today = new Date();
@@ -39,10 +48,10 @@ export default function Page() {
 
     // データベースから週間データを取得する関数（コメントアウト）
     const fetchWeeklyData = async () => {
-        /*
+        
         // 実際のデータベース連携処理（一時的にコメントアウト）
         try {
-            const response = await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT + '/weekly-colors', {
+            const response = await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT + '/mood/week', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -52,11 +61,17 @@ export default function Page() {
 
             if (response.ok) {
                 const data = await response.json();
-                // データベースから取得した色データを設定
-                const formattedData = data.weeklyColors.map((item, index) => ({
-                    day: ["月", "火", "水", "木", "金", "土", "日"][index],
-                    color: item.color || "#CCCCCC" // デフォルト色
-                }));
+                // 7日間の完全なデータを作成（データがない日はグレー）
+                const dayNames = ["月", "火", "水", "木", "金", "土", "日"];
+                const formattedData = dayNames.map((dayName, index) => {
+                    // APIデータが存在し、かつ該当インデックスにデータがある場合
+                    const colorId = data.color_ids && data.color_ids[index] !== undefined ? data.color_ids[index] : null;
+                    return {
+                        day: dayName,
+                        color: colorId ? COLOR_MAP[colorId] || "#CCCCCC" : "#CCCCCC", // データがない場合はグレー
+                        colorId: colorId
+                    };
+                });
                 setWeeklyData(formattedData);
             } else {
                 console.error('Failed to fetch weekly data');
@@ -68,10 +83,7 @@ export default function Page() {
             // エラー時はデフォルトデータを使用
             setWeeklyData(getDefaultWeeklyData());
         }
-        */
         
-        // 一時的に直接色を指定
-        setWeeklyData(getDefaultWeeklyData());
     };
 
     // デフォルトの週間データ（直接色指定）
@@ -88,7 +100,7 @@ export default function Page() {
     };
 
     // 日付クリック時の処理
-    const handleDayClick = async (dayData, index) => {
+    const handleDayClick = async (dayData) => {
         setSelectedDay(dayData);
         setIsModalOpen(true);
         
@@ -158,7 +170,9 @@ export default function Page() {
                                 <div className="text-gray-500">読み込み中...</div>
                             </div>
                         ) : (
-                            <WeeklySummary data={weeklyData} onDayClick={handleDayClick} />
+                            <div>
+                                <WeeklySummary data={weeklyData} onDayClick={handleDayClick} />
+                            </div>
                         )}
 
                         {/* キャラクター画像 */}
