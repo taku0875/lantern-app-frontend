@@ -141,7 +141,7 @@ export default function Page() {
 
             <div className="mx-8 min-h-screen flex items-center justify-center px-[2px]">
                 <div className="card w-full bg-white rounded-md shadow-sm">
-                    <div className="card-body text-center">
+                    <div className="card-body text-center p-4">
                         {/* 今週の記録タイトル */}
                         <div className="mb-4">
                             <h2 className="text-lg font-bold text-center">
@@ -165,8 +165,8 @@ export default function Page() {
                         <div className="flex justify-center my-6">
                             <img 
                                 src="./images/character.png" 
-                                alt="パッチョ" 
-                                className="max-w-full h-auto"
+                                alt="てがきですの！β" 
+                                className="max-w-full h-auto w-[200px]"
                             />
                         </div>
 
