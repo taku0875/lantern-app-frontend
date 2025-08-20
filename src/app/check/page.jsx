@@ -144,8 +144,8 @@ export default function Page() {
                 },
                 body: JSON.stringify({
                     answers: scores.map((score, index) => ({
-                        questionId: questions[index].id,
-                        categoryId: questions[index].categoryId,
+                        questionId: questions[index].question_id,
+                        categoryId: questions[index].category.category_id,
                         score: score
                     })),
                     totalScore: totalScore,
@@ -178,22 +178,17 @@ export default function Page() {
 
     // スコアに基づいて結果の色を計算する関数
     const calculateResultColor = (score) => {
-        // 5点〜25点を10色のグラデーションで表現
+        // 5点〜25点を5色のグラデーションで表現
         const colors = [
-            "#FF0000", // 赤：5点
-            "#FF4400", // 赤オレンジ：7-8点
-            "#FF8800", // オレンジ：9-10点
-            "#FFAA00", // 黄オレンジ：11-12点
-            "#FFDD00", // 黄：13-14点
-            "#DDFF00", // 黄緑：15-16点
-            "#AAFF00", // 緑黄：17-18点
-            "#77FF00", // 緑：19-20点
-            "#44FF00", // 明緑：21-22点
-            "#00FF00"  // 純緑：23-25点
+            "#ed735b", 
+            "#f18c30", 
+            "#57b658", 
+            "#0a9994", 
+            "#1c5dab", 
         ];
 
-        // スコアを0-9のインデックスに変換
-        const index = Math.min(Math.max(Math.floor((score - 5) / 2), 0), 9);
+        // スコアを0-4のインデックスに変換
+        const index = Math.min(Math.max(Math.floor((score - 5) / 4), 0), 4);
         return colors[index];
     };
 
@@ -237,13 +232,13 @@ export default function Page() {
             <div className="mx-4 mt-8">
                 {/* 質問ごとの表示 */}
                 {questions.map((q, qIndex) => (
-                    <div key={q.id} className="mb-8">
-                        <p className="mb-4 font-medium text-center">{q.text}</p>
+                    <div key={q.question_id} className="mb-8">
+                        <p className="mb-4 font-medium text-center">{q.question_text}</p>
 
                         {/* 開発用：カテゴリ表示（本番では削除） */}
                         {/* {process.env.NODE_ENV === 'development' && (
                             <p className="text-xs text-gray-400 text-center mb-2">
-                                [{categories[q.categoryId]}]
+                                [{q.category.category_name}]
                             </p>
                         )} */}
 
@@ -300,7 +295,9 @@ export default function Page() {
             </div>
 
             {/* チームロゴの右下配置 */}
-            <img src="./images/source.png" alt="チームロゴ" width={60} height={60} className="absolute bottom-0 right-0 mb-4 mr-4 z-50"/>
+            <div className="flex justify-end mt-4 mr-4">
+                <img src="./images/source.png" alt="チームロゴ" width={60} height={60}/>
+            </div>
         </div>
     );
 }
