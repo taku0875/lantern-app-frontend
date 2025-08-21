@@ -132,6 +132,7 @@ export default function Page() {
         setIsSubmitting(true);
 
         const totalScore = scores.reduce((acc, curr) => acc + curr, 0);
+        const averageScore = totalScore / questions.length;
 
         /*
         // 実際のバックエンド連携処理（一時的にコメントアウト）
@@ -156,7 +157,7 @@ export default function Page() {
             if (response.ok) {
                 const result = await response.json();
                 // 結果の色情報と共に結果画面に遷移
-                router.push(`/result?color=${result.resultColor}&score=${totalScore}`);
+                router.push(`/result?color=${result.resultColor}&score=${Math.round(averageScore)}`);
             } else {
                 console.error('Failed to submit diagnosis');
                 alert('診断の送信に失敗しました');
@@ -170,25 +171,31 @@ export default function Page() {
         */
 
         // 一時的にローカルで色を計算して結果画面に遷移
-        const resultColor = calculateResultColor(totalScore);
+        const resultColor = calculateResultColor(averageScore);
+        const roundedScore = Math.round(averageScore);
         setTimeout(() => {
-            router.push(`/result?color=${encodeURIComponent(resultColor)}&score=${totalScore}`);
+            router.push(`/result?color=${encodeURIComponent(resultColor)}&score=${roundedScore}`);
         }, 500);
     };
 
     // スコアに基づいて結果の色を計算する関数
-    const calculateResultColor = (score) => {
-        // 5点〜25点を5色のグラデーションで表現
+    const calculateResultColor = (averageScore) => {
+        // 平均点に基づく5色の分類
         const colors = [
-            "#ed735b", 
-            "#f18c30", 
-            "#57b658", 
-            "#0a9994", 
-            "#1c5dab", 
+            "#ed735b", //赤っぽい色
+            "#f18c30", //オレンジ色
+            "#57b658", //緑色
+            "#0a9994", //青緑色
+            "#1c5dab", //青色
         ];
 
-        // スコアを0-4のインデックスに変換
-        const index = Math.min(Math.max(Math.floor((score - 5) / 4), 0), 4);
+        // 平均点を整数に丸める
+        const roundedScore = Math.round(averageScore);
+        
+        // 整数化された平均点を0-4のインデックスに変換
+        // 1 → 0, 2 → 1, 3 → 2, 4 → 3, 5 → 4
+        const index = Math.min(Math.max(roundedScore - 1, 0), 4);
+
         return colors[index];
     };
 
