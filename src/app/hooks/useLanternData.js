@@ -1,47 +1,31 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { getPastLanternsAPI, saveNewLantanAPI } from '@/lib/api';
+import { useState, useCallback } from 'react';
 
+// 色の定義
 const COLOR_MAP = {
-  1: '#ed735b', 2: '#f18c30', 3: '#57b658',
-  4: '#0a9994', 5: '#1c5dab',
+  1: '#ed735b', 2: '#f18c30', 3: '#57b658', 4: '#59b6c0', 5: '#4b8aed',
 };
 
-
-export function useLanternData(user, token) {
+export const useLanternData = () => {
+  // 飛ばしたランタンのリストを管理する
   const [lanterns, setLanterns] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
 
-  const fetchPastLanterns = useCallback(async () => {
-    if (!user || !token) { setIsLoading(false); return; };
-    setIsLoading(true);
-    const pastData = await getPastLanternsAPI(user.id, token);
-    const formattedLanterns = pastData.map(data => ({
-      id: data.lantan_id,
-      color: COLOR_MAP[data.color_id] || '#cccccc',
-      isStatic: true,
-    }));
-    setLanterns(formattedLanterns);
-    setIsLoading(false);
-  }, [user, token]);
+  // 「新しいランタンを1つリストに追加する」という機能だけを持つ関数
+  const releaseNewLantern = useCallback(() => {
+    // 1〜5の中からランダムな色IDを決定
+    const randomColorId = Math.floor(Math.random() * 5) + 1;
+    
+    // 新しいランタンのデータを作成
+    const newLantern = {
+      id: `released-${Date.now()}`, // 時間を元にユニークなIDを作成
+      color: COLOR_MAP[randomColorId],
+      isStatic: false, // isStatic: falseは「新しく飛ばすランタン」の目印
+    };
 
-  const releaseNewLantern = useCallback(async (answers) => {
-    if (!user || !token) return;
-    const newLantanData = await saveNewLantanAPI(user.id, answers, token);
-    if (newLantanData) {
-      const newLantern = {
-        id: newLantanData.lantan_id,
-        color: COLOR_MAP[newLantanData.color_id] || '#cccccc',
-        isStatic: false,
-      };
-      setLanterns(prev => [...prev, newLantern]);
-    }
-  }, [user, token]);
+    // 現在のランタンリストの末尾に、新しいランタンを1つ追加する
+    setLanterns(prevLanterns => [...prevLanterns, newLantern]);
+  }, []); // useCallbackの第二引数は空でOK
 
-  useEffect(() => {
-    fetchPastLanterns();
-  }, [fetchPastLanterns]);
-
-  return { lanterns, isLoading, releaseNewLantern };
-}
+  return { lanterns, releaseNewLantern };
+};

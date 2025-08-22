@@ -3,25 +3,26 @@
 import { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Environment, PerspectiveCamera } from '@react-three/drei';
-import { FloatingLanterns } from './FLoatingLanterns';
+import { EffectComposer, Bloom } from '@react-three/postprocessing';
+import { FloatingLanterns } from './FLoatingLanterns'; // 背景ランタン
+import { ReleasedLantern } from './ReleasedLantern';  // 新しく飛ばすランタン
 import { useFrame } from '@react-three/fiber';
 
-// カメラをゆっくり動かすコンポーネント
 function Rig() {
-    useFrame((state, delta) => {
-        state.camera.position.x = Math.sin(state.clock.elapsedTime * 0.1) * 2;
-        state.camera.position.z = Math.cos(state.clock.elapsedTime * 0.1) * 2 + 13;
-        state.camera.lookAt(0, 2, 0);
+    useFrame((state) => {
+        state.camera.position.x = Math.sin(state.clock.elapsedTime * 0.1) * 5;
+        state.camera.position.z = 10 + Math.cos(state.clock.elapsedTime * 0.1) * 5;
+        state.camera.lookAt(0, 5, 0);
     });
     return null;
 }
 
 export default function LanternScene({ lanterns }) {
   return (
-    <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: -1 }}>
+    <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%'}}>
       <Canvas>
-        <PerspectiveCamera makeDefault position={[0, 2, 15]} fov={60} />
-        <ambientLight intensity={0.8} />
+        <PerspectiveCamera makeDefault position={[0, 2, 15]} fov={75} />
+        <ambientLight intensity={0.2} />
         <Environment
           background
           files={[
@@ -31,9 +32,25 @@ export default function LanternScene({ lanterns }) {
           ]}
         />
         <Suspense fallback={null}>
-          <FloatingLanterns lanterns={lanterns} />
+          {/* 1. 背景用の10個のランタンを常に表示 */}
+          <FloatingLanterns />
+
+          {/* 2. ボタンで新しく飛ばされたランタンをここに追加して描画 */}
+          {lanterns.map((lanternData) => (
+            <ReleasedLantern key={lanternData.id} {...lanternData} />
+          ))}
+
           <Rig />
         </Suspense>
+
+        <EffectComposer>
+          <Bloom 
+            luminanceThreshold={0.3}
+            luminanceSmoothing={0.9} 
+            height={300} 
+            intensity={1.0}
+          />
+        </EffectComposer>
       </Canvas>
     </div>
   );
