@@ -20,129 +20,40 @@ export default function Page() {
         return true; // デバッグ用に常にtrueを返す
     };
 
-    // 固定の提案行動データ（スコア別）
-    const allActions = {
-        low: [ // 5-12点：要注意〜やや心配
-            { 
-                id: 1,
-                title: '深呼吸をする', 
-                detail: 'ゆっくりと深呼吸をすることで、心を落ち着かせることができます。',
-                effect: 'ストレス軽減、リラックス効果',
-                image: './images/breathing.png'
-            },
-            { 
-                id: 2,
-                title: '温かい飲み物を飲む', 
-                detail: 'ハーブティーや温かいココアで、心と体を温めましょう。',
-                effect: 'リラックス効果、心の安定',
-                image: './images/warm-drink.png'
-            },
-            { 
-                id: 3,
-                title: '誰かに話を聞いてもらう', 
-                detail: '信頼できる人に気持ちを話すことで、心が軽くなります。',
-                effect: 'ストレス解消、気持ちの整理',
-                image: './images/talk.png'
-            },
-            { 
-                id: 4,
-                title: '軽いストレッチをする', 
-                detail: '体をほぐすことで、心の緊張も和らげることができます。',
-                effect: '血行促進、リラックス効果',
-                image: './images/stretch.png'
-            }
-        ],
-        medium: [ // 13-16点：普通
-            { 
-                id: 5,
-                title: '散歩に出かける', 
-                detail: '自然の中を歩くことで、気分がさらに穏やかになります。',
-                effect: '気分転換、運動効果',
-                image: './images/walk.png'
-            },
-            { 
-                id: 6,
-                title: '音楽を聴く', 
-                detail: 'お気に入りの音楽が、あなたの気持ちをサポートします。',
-                effect: 'リラックス効果、感情調整',
-                image: './images/music.png'
-            },
-            { 
-                id: 7,
-                title: '読書をする', 
-                detail: '好きな本を読んで、心を豊かにする時間を過ごしましょう。',
-                effect: 'リラックス効果、知的刺激',
-                image: './images/reading.png'
-            },
-            { 
-                id: 8,
-                title: 'お風呂にゆっくり入る', 
-                detail: '温かいお風呂で、一日の疲れを癒やしましょう。',
-                effect: 'リラックス効果、疲労回復',
-                image: './images/bath.png'
-            }
-        ],
-        high: [ // 17-25点：良好〜非常に良好
-            { 
-                id: 9,
-                title: '新しいことに挑戦する', 
-                detail: '今の良い状態を活かして、新しいことにチャレンジしてみましょう。',
-                effect: '成長促進、達成感',
-                image: './images/challenge.png'
-            },
-            { 
-                id: 10,
-                title: '友人と過ごす時間を作る', 
-                detail: '大切な人との時間を楽しみ、さらに幸福感を高めましょう。',
-                effect: '社交性向上、幸福感増加',
-                image: './images/friends.png'
-            },
-            { 
-                id: 11,
-                title: '趣味の時間を充実させる', 
-                detail: '好きなことにより多くの時間を使い、充実感を味わいましょう。',
-                effect: '満足感、創造性向上',
-                image: './images/hobby.png'
-            },
-            { 
-                id: 12,
-                title: '運動を楽しむ', 
-                detail: '体を動かすことで、さらに活力を高めることができます。',
-                effect: '体力向上、ストレス解消',
-                image: './images/exercise.png'
-            }
-        ]
-    };
-
     // スコアに基づく説明文
     const getScoreDescription = (score, color) => {
-        if (score <= 8) return <p>あなたの心の色は深い赤です。<br />少し休息が必要かもしれません。</p>;
-        if (score <= 12) return <p>あなたの心の色は温かいオレンジです。<br />ゆっくりとした時間を過ごしましょう。</p>;
-        if (score <= 16) return <p>あなたの心の色は明るい緑です。<br />バランスの取れた状態です。</p>;
-        if (score <= 20) return <p>あなたの心の色は爽やかな青緑です。<br />とても良い状態ですね。</p>;
+        if (score == 1) return <p>あなたの心の色は深い赤です。<br />少し休息が必要かもしれません。</p>;
+        if (score == 2) return <p>あなたの心の色は温かいオレンジです。<br />ゆっくりとした時間を過ごしましょう。</p>;
+        if (score == 3) return <p>あなたの心の色は明るい緑です。<br />バランスの取れた状態です。</p>;
+        if (score == 4) return <p>あなたの心の色は爽やかな青緑です。<br />とても良い状態ですね。</p>;
         return <p>あなたの心の色は美しい青です。<br />素晴らしいコンディションです！</p>;
     };
 
-    // バックエンドから提案行動を取得する関数（コメントアウト）
+    // バックエンドから提案行動を取得する関数
     const fetchSuggestedActions = async (score) => {
-        /*
-        // 実際のバックエンド連携処理（一時的にコメントアウト）
         try {
-            const response = await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT + '/suggested-actions', {
+            const response = await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT + '/recommendations', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('authToken')}`
                 },
                 body: JSON.stringify({
-                    score: score,
-                    count: 2
+                    score: score
                 })
             });
 
             if (response.ok) {
                 const data = await response.json();
-                return data.actions;
+                // バックエンドのデータ構造に対応したマッピング
+                return data.map(item => ({
+                    id: item.recommend_id,
+                    title: item.action_recommend,
+                    detail: item.recommend_detail,
+                    effect: 'リラックス効果、心の安定', // バックエンドにeffectがない場合のデフォルト
+                    image: './images/default.png', // バックエンドにimageがない場合のデフォルト
+                    color_id: item.color_id
+                }));
             } else {
                 console.error('Failed to fetch suggested actions');
                 return getDefaultActions(score);
@@ -151,26 +62,6 @@ export default function Page() {
             console.error('Error fetching suggested actions:', error);
             return getDefaultActions(score);
         }
-        */
-
-        // 一時的に固定データからランダム選択
-        return getDefaultActions(score);
-    };
-
-    // スコアに基づくデフォルト行動を取得
-    const getDefaultActions = (score) => {
-        let actionPool;
-        if (score <= 12) {
-            actionPool = allActions.low;
-        } else if (score <= 16) {
-            actionPool = allActions.medium;
-        } else {
-            actionPool = allActions.high;
-        }
-
-        // ランダムに2つ選択
-        const shuffled = [...actionPool].sort(() => 0.5 - Math.random());
-        return shuffled.slice(0, 2);
     };
 
     useEffect(() => {
@@ -277,7 +168,7 @@ export default function Page() {
                 {/* 行動提案カード */}
                 <div className="w-full px-2">
                     <h3 className="text-lg font-bold mb-4 text-center text-gray-800">おすすめの行動</h3>
-                    {resultData.actions.map((action, index) => (
+                    {resultData.actions.map((action) => (
                         <div
                             key={action.id}
                             onClick={() => setSelectedAction(action)}
@@ -369,14 +260,16 @@ export default function Page() {
                         </div>
 
                         {/* 効果 */}
-                        <div className="mb-6">
-                            <h3 className="text-sm font-semibold text-gray-600 mb-2">期待される効果</h3>
-                            <div className="bg-green-50 p-3 rounded-lg border-l-4 border-green-400">
-                                <p className="text-green-800 text-sm">
-                                    {selectedAction.effect}
-                                </p>
+                        {/* {selectedAction.effect && (
+                            <div className="mb-6">
+                                <h3 className="text-sm font-semibold text-gray-600 mb-2">期待される効果</h3>
+                                <div className="bg-green-50 p-3 rounded-lg border-l-4 border-green-400">
+                                    <p className="text-green-800 text-sm">
+                                        {selectedAction.effect}
+                                    </p>
+                                </div>
                             </div>
-                        </div>
+                        )} */}
 
                         {/* 閉じるボタン */}
                         <button
