@@ -1,5 +1,8 @@
+// app/result/page.jsx
+
 import { Suspense } from 'react';
 import ResultClient from './ResultClient';
+import Header from '../components/Header'; // ローディング中もヘッダーを表示する場合
 
 // このページはサーバーコンポーネントとして、静的な枠組みだけを提供します
 export default function ResultPage() {
@@ -7,8 +10,8 @@ export default function ResultPage() {
     // SuspenseでResultClientを囲み、fallbackにローディングUIを指定します
     <Suspense fallback={
         <div className="max-w-[393px] mx-auto h-screen relative bg-[#dde7c7]">
-            {/* Headerをここにも配置すると、ローディング中も表示されます */}
-            {/* <Header /> */}
+            {/* ローディング中もヘッダーを表示すると、レイアウトがガタつきにくいです */}
+            <Header /> 
             <div className="flex justify-center items-center h-full">
                 <div className="text-gray-600">結果を読み込み中...</div>
             </div>
@@ -16,5 +19,4 @@ export default function ResultPage() {
     }>
       <ResultClient />
     </Suspense>
-  );
-}
+  );}
