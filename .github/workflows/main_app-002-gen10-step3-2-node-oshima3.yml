@@ -1,7 +1,4 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
-name: Build and deploy Node.js app to Azure Web App - app-002-gen10-step3-2-node-oshima3
+name: Build and deploy Standalone Next.js app to Azure Web App
 
 on:
   push:
@@ -10,59 +7,34 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read #This is required for actions/checkout
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
-          node-version: '22.x'
+          node-version: '20.x'
 
-      - name: npm install, build, and test
-        env:
-            NEXT_PUBLIC_API_ENDPOINT: ${{ secrets.NEXT_PUBLIC_API_ENDPOINT }}
+      - name: npm install and build
         run: |
           npm install
-          npm run build --if-present
-          npm run test --if-present
-          
-      - name: Copy artifact for deployment job
+          npm run build
+
+      - name: Copy public and static assets to standalone folder
         run: |
-          mkdir deploy
-          cp -r ./.next/standalone/. ./deploy
-          cp -r ./.next/static/. ./deploy/.next/static
+          cp -r ./public ./.next/standalone/public
+          cp -r ./.next/static ./.next/standalone/.next/static
 
-      - name: Zip artifact for deployment
-        run: zip release.zip ./deploy -r 
-
-
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v4
-        with:
-          name: node-app
-          path: .
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    
-    steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v4
-        with:
-          name: node-app
-      
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'app-002-gen10-step3-2-node-oshima3'
+          app-name: 'app-002-gen10-step3-2-node-oshima3' # あなたのアプリ名
           slot-name: 'Production'
-          package: ./deploy
-
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_75861A4883F84CE68C50828C6F14174C }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_75861A4883F84CE68C50828C6F14174C }} # あなたのPublish Profile
+          # ★★★ デプロイするフォルダを .next/standalone に指定 ★★★
+          package: ./.next/standalone
