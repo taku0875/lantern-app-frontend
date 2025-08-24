@@ -1,66 +1,45 @@
-name: Build and deploy Node.js app to Azure Web App - app-002-gen10-step3-2-node-oshima3
+name: deploy-next-to-azure
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install & Build
-        env:
-          NEXT_PUBLIC_API_ENDPOINT: ${{ secrets.NEXT_PUBLIC_API_ENDPOINT }}
-        run: |
-          npm ci
-          npm run build
-
-      - name: Prepare artifact (Next.js standalone)
-        run: |
-          mkdir -p deploy/.next
-          cp -r ./.next/standalone/* ./deploy/
-          cp -r ./.next/static ./deploy/.next/static
-          cp -r ./public ./deploy/public
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: node-app
-          path: deploy/
-
   deploy:
     runs-on: ubuntu-latest
-    needs: build
-    # Repository secrets を使うなら environment 行は不要です。
-    # 環境シークレットを使う場合のみ、下の行のコメントを外して Environment 名を合わせてください。
-    # environment: Production
     steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: node-app
-          path: ./deploy
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Preflight: check publish profile secret exists
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        env:
+          NEXT_PUBLIC_API_ENDPOINT: ${{ secrets.NEXT_PUBLIC_API_ENDPOINT }}
+        run: npm run build
+
+      - name: Prepare standalone output
+        run: |
+          mkdir -p .next/standalone/.next
+          cp -r public .next/standalone/public
+          cp -r .next/static .next/standalone/.next/static
+
+      - name: Preflight secret
         run: |
           if [ -z "${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_ADF3B27120A9474B879AD4FEC07F374A }}" ]; then
-            echo "ERROR: Publish profile secret is EMPTY or not visible to this job (check Environment / name / scope)."
-            exit 1
-          fi
+            echo "Publish profile secret missing or not accessible"; exit 1; fi
 
-      - name: Deploy to Azure Web App (Publish Profile)
+      - name: Deploy
         uses: azure/webapps-deploy@v3
         with:
           app-name: app-002-gen10-step3-2-node-oshima3
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_ADF3B27120A9474B879AD4FEC07F374A }}
-          package: ./deploy
+          package: ./.next/standalone
