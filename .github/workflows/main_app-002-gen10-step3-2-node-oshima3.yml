@@ -13,7 +13,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read #This is required for actions/checkout
+      contents: read 
 
     steps:
       - uses: actions/checkout@v4
@@ -24,10 +24,8 @@ jobs:
           node-version: '20.x'
 
       - name: npm install, build, and test
-	      
         env:
           NEXT_PUBLIC_API_ENDPOINT: ${{ secrets.NEXT_PUBLIC_API_ENDPOINT }}
-
         run: |
           npm install
           npm run build --if-present
@@ -72,4 +70,5 @@ jobs:
           slot-name: 'Production'
           package: ./deploy 
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_E7B6A535205646BF8B8C5C79AA88D9F4 }}
+
 
