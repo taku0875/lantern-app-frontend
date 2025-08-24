@@ -24,7 +24,7 @@ jobs:
           node-version: '20.x'
 
       - name: npm install, build, and test
-	      #1
+	      
         env:
           NEXT_PUBLIC_API_ENDPOINT: ${{ secrets.NEXT_PUBLIC_API_ENDPOINT }}
 
@@ -32,7 +32,7 @@ jobs:
           npm install
           npm run build --if-present
           npm run test --if-present
-			#2
+			
       - name: Copy artifact for deployment job
         run: |
           mkdir deploy
@@ -40,7 +40,7 @@ jobs:
           cp -r ./.next/static/. ./deploy/.next/static
 
       - name: Zip artifact for deployment
-        run: zip release.zip ./deploy -r  #3 書き換える
+        run: zip release.zip ./deploy -r 
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -70,5 +70,6 @@ jobs:
         with:
           app-name: 'app-002-gen10-step3-2-node-oshima3'
           slot-name: 'Production'
-          package: ./deploy  #4
+          package: ./deploy 
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_E7B6A535205646BF8B8C5C79AA88D9F4 }}
+
