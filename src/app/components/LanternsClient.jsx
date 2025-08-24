@@ -1,29 +1,27 @@
 'use client';
 
-// ReactからuseStateとuseEffectをインポートします
-import { useState, useEffect } from 'react'; 
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import LanternScene from './LanternScene';
 import { useLanternData } from '../hooks/useLanternData';
 import { useUser } from '../contexts/UserContext';
 
 export default function LanternsClient() {
-  // useUserフックからはtokenを受け取らないようにします
   const { user, isLoading: isUserLoading } = useUser();
-  
-  // ★★★ トークンを管理するためのstateを定義します ★★★
   const [token, setToken] = useState(null);
+  const [isTokenChecked, setIsTokenChecked] = useState(false);
 
-  // ★★★ コンポーネントが読み込まれた時にlocalStorageからトークンを取得します ★★★
+  // ✨ --- ここが重要 --- ✨
+  // 条件分岐（if文）の前に、すべてのフックを呼び出します。
+  const { pastLanterns, newlyReleasedLantern, releaseNewLantern, isLoading: isLanternsLoading, error } = useLanternData(user, token);
+
   useEffect(() => {
-    // ブラウザ環境でのみlocalStorageからauthTokenを取得
     const storedToken = localStorage.getItem('authToken');
     if (storedToken) {
       setToken(storedToken);
     }
-  }, []); // 空の配列を渡すことで、最初の読み込み時に一度だけ実行されます
-
-  // 取得したtokenをuseLanternDataフックに渡します
-  const { lanterns, isLoading: isLanternsLoading, releaseNewLantern } = useLanternData(user, token);
+    setIsTokenChecked(true);
+  }, []);
 
   const handleReleaseLantern = async () => {
     try {
@@ -33,22 +31,42 @@ export default function LanternsClient() {
     }
   };
 
-  // ユーザー情報かランタン情報の読み込み中はローディング画面を表示
-  // tokenがまだ読み込めていない場合も考慮します
-  if (isUserLoading || (user && !token)) {
-    return <div>読み込み中...</div>;
+  // フックを呼び出した後に、ローディング状態のチェックを行います。
+  if (isUserLoading || !isTokenChecked) {
+    return <div className="flex justify-center items-center h-screen">読み込み中...</div>;
+  }
+
+  // 読み込み完了後、ユーザーがいない（ログインしていない）場合の表示
+  if (!user) {
+    return (
+      <div className="flex flex-col justify-center items-center h-screen text-center">
+        <p className="mb-4">ランタンを飛ばすにはログインが必要です。</p>
+        <Link href="/" className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+          ログインページへ
+        </Link>
+      </div>
+    );
   }
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-      <LanternScene lanterns={lanterns} />
+      <LanternScene pastLanterns={pastLanterns} newlyReleasedLantern={newlyReleasedLantern} />
       
       <div style={{ position: 'absolute', bottom: '5vh', left: '50%', transform: 'translateX(-50%)', zIndex: 10 }}>
         <button
           onClick={handleReleaseLantern}
-          style={{ padding: '15px 30px', fontSize: '1.1rem', background: 'white', color: 'black', borderRadius: '8px' }}
+          disabled={isLanternsLoading || newlyReleasedLantern} // ✨【タイポ修正】 isabled -> disabled
+          style={{ 
+            padding: '15px 30px', 
+            fontSize: '1.1rem', 
+            background: (isLanternsLoading || newlyReleasedLantern) ? '#ccc' : 'white', 
+            color: 'black', 
+            borderRadius: '8px',
+            cursor: (isLanternsLoading || newlyReleasedLantern) ? 'not-allowed' : 'pointer',
+            transition: 'background-color 0.2s'
+          }}
         >
-          ランタンを飛ばす
+          {isLanternsLoading ? '準備中...' : 'ランタンを飛ばす'}
         </button>
       </div>
     </div>

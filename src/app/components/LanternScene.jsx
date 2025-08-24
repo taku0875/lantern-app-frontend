@@ -17,7 +17,7 @@ function Rig() {
     return null;
 }
 
-export default function LanternScene({ lanterns }) {
+export default function LanternScene({ pastLanterns = [], newlyReleasedLantern = null  }) {
   return (
     <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%'}}>
       <Canvas>
@@ -32,13 +32,26 @@ export default function LanternScene({ lanterns }) {
           ]}
         />
         <Suspense fallback={null}>
-          {/* 1. 背景用の10個のランタンを常に表示 */}
+          {/* 1. 背景用の5個のランタンを常に表示 */}
           <FloatingLanterns />
 
-          {/* 2. ボタンで新しく飛ばされたランタンをここに追加して描画 */}
-          {lanterns.map((lanternData) => (
-            <ReleasedLantern key={lanternData.id} {...lanternData} />
+          {/* 2. DBから取得した過去の静的なランタンを描画 */}
+          {pastLanterns.map((lantern) => (
+            <ReleasedLantern 
+              key={`past-${lantern.lantan_id}`} 
+              colorId={lantern.lantan_color}
+              isStatic={true} // 静的オブジェクトとして設定
+            />
           ))}
+
+          {/* 3. ボタンで新しく飛ばされたアニメーション付きランタンを描画 */}
+          {newlyReleasedLantern && (
+            <ReleasedLantern 
+              key={`new-${newlyReleasedLantern.lantan_id}`}
+              colorId={newlyReleasedLantern.lantan_color}
+              isStatic={false} // アニメーションさせるオブジェクトとして設定
+            />
+          )}
 
           <Rig />
         </Suspense>

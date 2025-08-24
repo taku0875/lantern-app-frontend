@@ -59,7 +59,7 @@ export function ReleasedLantern({ color, isStatic }) {
       <mesh ref={lightRef} position={[0, -0.4, 0]}>
         <sphereGeometry args={[0.3, 16, 16]} />
         <meshStandardMaterial
-          emissive="#ffaa55"
+          emissive={"#ffddaa"} 
           emissiveIntensity={5}
           toneMapped={false}
           transparent={true}

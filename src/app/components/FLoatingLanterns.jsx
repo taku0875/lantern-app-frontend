@@ -1,77 +1,85 @@
 'use client';
 
-import * as THREE from 'three';
 import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { useTexture } from '@react-three/drei'; // ✨ dreiからuseTextureフックをインポート
+import * as THREE from 'three';
 
-const texture = new THREE.TextureLoader().load('/lantern_texture.png');
-texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+// 背景ランタン用に '#f18c30' 以外の4色を定義
+const DUMMY_COLORS = ['#ed735b', '#57b658', '#59b6c0', '#4b8aed'];
 
-const shadeMaterial = new THREE.MeshStandardMaterial({
-  map: texture,
-  emissiveMap: texture,
-  emissive: "#ffddaa",
-  emissiveIntensity: 1.1,
-  transparent: true,
-  opacity: 0.85,
-  side: THREE.DoubleSide,
-  roughness: 0.6,
-});
-
-const lightMaterial = new THREE.MeshStandardMaterial({
-  emissive: "#ffaa55",
-  emissiveIntensity: 5,
-  toneMapped: false,
-  transparent: true,
-  opacity: 0.7,
-});
-
-const shadeGeometry = new THREE.CylinderGeometry(0.7, 0.4, 1.8, 16, 5, false);
-const lightGeometry = new THREE.SphereGeometry(0.3, 16, 16);
-
-export function FloatingLanterns() {
-  const shadeRef = useRef();
+// 個々のランタンを描画するためのコンポーネント
+function Lantern({ initialPosition, color }) {
+  const ref = useRef();
   const lightRef = useRef();
-  const COUNT = 5; // 背景ランタンの数を5個に調整
+  const pointLightRef = useRef(); // ✨ PointLight用のrefを追加
 
-  const particles = useMemo(() => {
-    return Array.from({ length: COUNT }, () => ({
-      position: [
-        (Math.random() - 0.5) * 25, // X方向の範囲
-        2 + Math.random() * 20,     // Y方向の初期高さを少し上げる
-        (Math.random() - 0.5) * 15, // Z方向（奥行き）の範囲を狭める
-      ],
-      offset: Math.random() * 100,
-    }));
-  }, []);
+  // ✨ useTextureフックを使って和紙のテクスチャを読み込む
+  const texture = useTexture('/lantern_texture.png');
+  // ✨ テクスチャが繰り返されるように設定
+  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
 
-  useFrame((state) => {
-    const time = state.clock.getElapsedTime();
-    const dummy = new THREE.Object3D();
-
-    particles.forEach((particle, i) => {
-      let [x, y, z] = particle.position;
-      y += 0.015; // 上昇速度を少しゆっくりに
-      if (y > 30) y = -5;
-      particle.position[1] = y;
-
-      const sway = Math.sin(time * 0.15 + particle.offset) * 0.4;
-      
-      dummy.position.set(x + sway, y, z + sway);
-      dummy.updateMatrix();
-
-      shadeRef.current.setMatrixAt(i, dummy.matrix);
-      lightRef.current.setMatrixAt(i, dummy.matrix);
-    });
-
-    shadeRef.current.instanceMatrix.needsUpdate = true;
-    lightRef.current.instanceMatrix.needsUpdate = true;
+  // 各ランタンがゆっくりと上下に揺れるアニメーション
+  useFrame(({ clock }) => {
+    if (ref.current) {
+      ref.current.position.y = initialPosition[1] + Math.sin(clock.getElapsedTime() + initialPosition[0]) * 0.5;
+    }
   });
 
   return (
-    <>
-      <instancedMesh ref={shadeRef} args={[shadeGeometry, shadeMaterial, COUNT]} />
-      <instancedMesh ref={lightRef} args={[lightGeometry, lightMaterial, COUNT]} position={[0, -0.4, 0]} />
-    </>
+    <group position={initialPosition} ref={ref}>
+      <mesh>
+        <cylinderGeometry args={[0.7, 0.4, 1.8, 16]} />
+        {/* ✨ より高品質なPhysicalMaterialに変更 */}
+        <meshPhysicalMaterial
+          map={texture}
+          emissiveMap={texture}
+          emissive={color}
+          emissiveIntensity={1.4}
+          side={THREE.DoubleSide}
+          roughness={0.6}
+          metalness={0}
+          transmission={0.8}
+          thickness={0.1}
+        />
+      </mesh>
+      <mesh position={[0, -0.4, 0]}>
+        <sphereGeometry args={[0.3, 16, 16]} />
+        <meshStandardMaterial
+          emissive={"#ffaa55"} //// 光源の色も合わせる
+          toneMapped={false}
+        />
+      </mesh>
+            {/* ✨ 実際に光を放つPointLightを追加 */}
+      <pointLight
+        ref={pointLightRef}
+        position={[0, -0.4, 0]}
+        color="#ffaa55"
+        distance={5}
+      />
+    </group>
+  );
+}
+
+
+// メインのコンポーネント
+export function FloatingLanterns() {
+  const lanterns = useMemo(() => [
+    { position: [-5, 5, -2], color: DUMMY_COLORS[0] }, // 赤色
+    { position: [6, 8, 0],  color: DUMMY_COLORS[1] }, // 緑色
+    { position: [-4, 10, 3], color: DUMMY_COLORS[2] }, // 青緑色
+    { position: [5, 3, -4],  color: DUMMY_COLORS[3] }, // 青色
+  ], []);
+
+  return (
+    <group>
+      {lanterns.map((lantern, index) => (
+        <Lantern 
+          key={index} 
+          initialPosition={lantern.position} 
+          color={lantern.color} 
+        />
+      ))}
+    </group>
   );
 }
