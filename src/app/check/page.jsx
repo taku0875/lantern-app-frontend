@@ -233,7 +233,7 @@ export default function Page() {
     }
 
     return (
-        <div className="max-w-[393px] mx-auto h-screen relative bg-white">
+        <div className="max-w-[393px] mx-auto min-h-screen relative bg-white">
             <Header />
 
             <div className="mx-4 mt-8">
