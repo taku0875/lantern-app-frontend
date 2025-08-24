@@ -93,7 +93,7 @@ export default function ResultClient() {
 
     // ✨ ここから下が正しいJSXです
     return (
-         <div className="max-w-[393px] mx-auto h-screen relative bg-[#dde7c7]">
+         <div className="max-w-[393px] mx-auto min-h-screen relative bg-[#dde7c7]">
             <Header />
             <main className="flex flex-col items-center mt-8 mx-2 pb-20">
                 {/* 結果の色の円表示 */}
@@ -176,8 +176,10 @@ export default function ResultClient() {
                 </div>
             )}
             
-            {/* チームロゴ */}
-            <img src="./images/source.png" alt="チームロゴ" width={60} height={60} className="absolute bottom-0 right-0 mb-4 mr-4 z-50"/>
+            {/* チームロゴの右下配置 */}
+            <div className="flex justify-end mt-4 mr-4">
+                <img src="./images/source.png" alt="チームロゴ" width={60} height={60}/>
+            </div>
         </div>
     );
 }
