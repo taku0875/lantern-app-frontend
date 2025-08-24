@@ -20,12 +20,17 @@ jobs:
           npm ci
           npm run build
 
-      # Next.js standalone を App Service に置くためのコピー
       - name: Prepare standalone output
         run: |
           mkdir -p ./.next/standalone/.next
           cp -r ./public ./.next/standalone/public
           cp -r ./.next/static ./.next/standalone/.next/static
+
+      - name: Preflight: check publish profile secret exists
+        run: |
+          if [ -z "${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_75861A4883F84CE68C50828C6F14174C }}" ]; then
+            echo "Publish profile secret is EMPTY or not visible to this workflow."; exit 1;
+          fi
 
       - name: Deploy to Azure Web App (Publish Profile)
         uses: azure/webapps-deploy@v3
