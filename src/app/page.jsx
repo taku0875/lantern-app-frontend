@@ -110,7 +110,7 @@ export default function Login() {
             </div>
             
             <form onSubmit={handleLogin}>
-                <div className="mx-4">
+                <div className="mx-4 mt-[10px]">
                     {/* エラーメッセージ表示 */}
                     {error && (
                         <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-sm">

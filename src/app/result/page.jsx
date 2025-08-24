@@ -9,7 +9,7 @@ export default function ResultPage() {
   return (
     // SuspenseでResultClientを囲み、fallbackにローディングUIを指定します
     <Suspense fallback={
-        <div className="max-w-[393px] mx-auto h-screen relative bg-[#dde7c7]">
+        <div className="max-w-[393px] mx-auto min-h-screen relative bg-[#dde7c7]">
             {/* ローディング中もヘッダーを表示すると、レイアウトがガタつきにくいです */}
             <Header /> 
             <div className="flex justify-center items-center h-full">
